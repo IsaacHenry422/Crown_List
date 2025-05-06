@@ -13,9 +13,15 @@ const cors = require('cors');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const morgan = require('morgan');
+const listEndpoints = require('express-list-routes'); // Import the library
+const swaggerUi = require('swagger-ui-express'); // Import Swagger UI Express
+const YAML = require('yamljs'); // Import YAML for loading your OpenAPI file
 
 // Import your configuration file
 const config = require('./src/configuration/config');
+
+// Load your OpenAPI specification
+const openapiDocument = YAML.load('./src/docs/openapi.yaml');
 
 // console.log('MongoDB URI from config:', config.MONGODB_URI); // Commented out
 // console.log(path.join(__dirname, 'src/configuration/config')); // Commented out
@@ -60,6 +66,9 @@ app.get('/', (req, res) => {
   res.send('Welcome to your API!'); // You can customize this message
 });
 
+// Serve Swagger UI at /api-docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiDocument));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -78,4 +87,10 @@ mongoose.connect(config.MONGODB_URI)
     .catch(err => console.error('Could not connect to MongoDB:', err));
 
 const port = config.PORT || 3000;
+
+// After all routes are defined, log them to the console (for development)
+console.log('API Endpoints:');
+console.log(listEndpoints(app));
+console.log(`Swagger UI available at http://localhost:${port}/api-docs`);
+
 app.listen(port, () => console.log(`Server running on port ${port}`));
