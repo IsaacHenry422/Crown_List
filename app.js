@@ -55,6 +55,11 @@ app.use(session({
     }
 }));
 
+// Define a route for the root path '/'
+app.get('/', (req, res) => {
+  res.send('Welcome to your API!'); // You can customize this message
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
